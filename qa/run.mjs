@@ -75,8 +75,8 @@ function resolve(P) {
   check("出典は e-Gov 法令検索の条文だけ（民法）", Object.values(G.SRC).every(([n, u]) => /^民法 第/.test(n) && u === "https://laws.e-gov.go.jp/law/129AC0000000089"));
   { const all = []; for (const k of G.KINDS) { all.push(k.why, k.look, k.key, k.name); for (let i = 0; i < 100; i++) { const P = G.make(`${k.id}|nz${i}`); all.push(P.q, ...P.opts); } }
     check("実在の会社・「違法です」「訴え」などの言い切りや助言を出さない", !/株式会社|訴え|違法です|弁護士|得をする|もらわないと損/.test(all.join()));
-    { const bad = []; for (let i = 0; i < 300; i++) { const P = G.make(`sajutsu|sj${i}`); if (/同意/.test(P.q)) bad.push(P.q); }
-      check("詐術（第21条）の場面は「大人（行為能力者）だと信じさせる」うそだけ。親の同意があると思わせる場面は入れない（CodeRabbit keiyaku-torikeshi#1）", bad.length === 0, bad[0]); }
+    { const bad = []; for (let i = 0; i < 300; i++) { const P = G.make(`sajutsu|sj${i}`); if (/同意/.test(P.q) || !/20歳|大人/.test(P.q)) bad.push(P.q); }
+      check("詐術（第21条）の場面は「大人（行為能力者）だと信じさせる」うそだけで、うその年が大人（20歳）だと分かる。親の同意があると思わせる場面は入れない（CodeRabbit keiyaku-torikeshi#1）", bad.length === 0, bad[0]); }
     check("クーリング・オフ・消費者契約法の取消しを答えにしない（民法だけ。#416 と重ねない）", !/クーリング|消費者契約法|特定商取引/.test(all.join())); }
   const sb = Object.keys(G.GROUPS).filter((g) => /第\d+条/.test(G.GROUPS[g].name + G.GROUPS[g].sub));
   check("2段目の決まりは5つ（未成年者の契約・後見・保佐・だまされた・おどされた・追認と催告・取消しの効果と期限）で、選び肢に条の番号を書かない", Object.keys(G.GROUPS).join() === "mise,seinen,kashi,tsuinin,kigen" && sb.length === 0, sb.join());
@@ -282,6 +282,10 @@ try {
       await z.reload(); await z.waitForTimeout(200);
       const r = await z.evaluate(() => __nm.load().runs);
       check("知らない mode の途中経過は捨て、ホームが出る", !("d" in r) && !("h" in r) && await z.locator("#go-d").count() === 1);
+      // 数の所に toString の無い物が入っても止まらない（引き継ぎコードで入りうる。CodeRabbit risoku-jogen#1）
+      await z.evaluate(() => { const s = JSON.parse(localStorage.getItem("kyk-v1")) || { v: 1 }; s.v = 1; s.ebest = { toString: null }; s.dex = { e: { toString: null } }; localStorage.setItem("kyk-v1", JSON.stringify(s)); });
+      await z.reload(); await z.waitForTimeout(200);
+      check("数の所に toString の無い物が入っても、0にしてホームが出る（CodeRabbit risoku-jogen#1）", await z.locator("#go-d").count() === 1 && await z.evaluate(() => { const s = __nm.load(); return s.ebest === 0 && s.dex.e === 0; }));
       // 別のタブで終えたまま記録していない上級の回は、次の回を始める前に記録する
       await z.evaluate(() => { const s = __nm.load(), y = "2026-11-06", G = __nm.G; s.runs.h = { mode: "h", date: y, list: G.hardTags(y), res: [{ m: 0 }, { m: 0 }, { m: 0 }], cur: null, id: "old" }; localStorage.setItem("kyk-v1", JSON.stringify(s)); });
       await z.reload(); await z.waitForTimeout(200); await z.evaluate(() => __nm.start("h"));

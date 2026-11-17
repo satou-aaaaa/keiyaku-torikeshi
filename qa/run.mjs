@@ -75,6 +75,8 @@ function resolve(P) {
   check("出典は e-Gov 法令検索の条文だけ（民法）", Object.values(G.SRC).every(([n, u]) => /^民法 第/.test(n) && u === "https://laws.e-gov.go.jp/law/129AC0000000089"));
   { const all = []; for (const k of G.KINDS) { all.push(k.why, k.look, k.key, k.name); for (let i = 0; i < 100; i++) { const P = G.make(`${k.id}|nz${i}`); all.push(P.q, ...P.opts); } }
     check("実在の会社・「違法です」「訴え」などの言い切りや助言を出さない", !/株式会社|訴え|違法です|弁護士|得をする|もらわないと損/.test(all.join()));
+    { const bad = []; for (let i = 0; i < 300; i++) { const P = G.make(`sajutsu|sj${i}`); if (/同意/.test(P.q)) bad.push(P.q); }
+      check("詐術（第21条）の場面は「大人（行為能力者）だと信じさせる」うそだけ。親の同意があると思わせる場面は入れない（CodeRabbit keiyaku-torikeshi#1）", bad.length === 0, bad[0]); }
     check("クーリング・オフ・消費者契約法の取消しを答えにしない（民法だけ。#416 と重ねない）", !/クーリング|消費者契約法|特定商取引/.test(all.join())); }
   const sb = Object.keys(G.GROUPS).filter((g) => /第\d+条/.test(G.GROUPS[g].name + G.GROUPS[g].sub));
   check("2段目の決まりは5つ（未成年者の契約・後見・保佐・だまされた・おどされた・追認と催告・取消しの効果と期限）で、選び肢に条の番号を書かない", Object.keys(G.GROUPS).join() === "mise,seinen,kashi,tsuinin,kigen" && sb.length === 0, sb.join());

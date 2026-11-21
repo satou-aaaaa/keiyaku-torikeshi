@@ -17,7 +17,7 @@ const results = [];
 const check = (name, ok, detail = "") => results.push({ name, ok: !!ok, detail: String(detail).slice(0, 400) });
 const G = createRequire(import.meta.url)(path.join(root, "data.js"));
 
-const PIN = "seinen18:19.5.3:店が決める.取り消せない.30日たてば取り消せる"; // 第1回の1問目（変わったら過去の日の問題が変わった印）
+const PIN = "seinen18:19.5.3:店が決める.取り消せない.親が決める"; // 2026-11-21 正解と両立する選び肢「30日たてば取り消せる」を言いかえ（並びは同じ） // 第1回の1問目（変わったら過去の日の問題が変わった印）
 // ---- 1. 問題の作り方（ブラウザを使わない）----
 // 解き直し（ゲームとは別に書いた表と計算。data.js の答えがこれと合うかを見る）
 // 出典：e-Gov 法令検索 民法（129AC0000000089、2026-06-24 施行の版を 2026-11-17 に読んだ）
